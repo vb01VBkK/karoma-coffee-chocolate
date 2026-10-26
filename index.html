@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b0d07">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Karoma Coffee Chocolate">
+<meta property="og:description" content="Chicchi di caffè tostati ricoperti di cioccolato fondente, in comodo astuccio da 30 g.">
+<meta property="og:image" content="espositore.webp">
+<style>*,*::before,*::after{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-font-smoothing:antialiased}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Karoma Coffee Chocolate</title>
+<meta name="description" content="Karoma Coffee Chocolate: chicchi di caffè tostati ricoperti di cioccolato fondente, in comodo astuccio da 30 g.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap">
+<style>
+/* Layout: cioccolato liquido in WebGL come fondo, astuccio 3D che oscilla tra destra e sinistra; il testo occupa sempre il lato libero. */
+:root{
+  --choc:#1b0d07;
+  --cream:#f6eee2;
+  --muted:#d2bfa6;
+  --gold:#d9a94f;
+  --gold-hi:#f0cf86;
+  --f:"Outfit","Helvetica Neue",Arial,sans-serif;
+  color-scheme:dark;
+}
+html{background:var(--choc)}
+body{background:var(--choc);color:var(--cream);font-family:var(--f);font-weight:300;font-size:17px;line-height:1.6;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--choc)}
+
+#choco,#stage{position:fixed;inset:0;width:100%;height:100%;display:block}
+#choco{z-index:0}
+#stage{z-index:1}
+
+header{position:fixed;top:0;left:0;right:0;z-index:5;height:76px;display:flex;align-items:center;justify-content:space-between;
+  margin-top:env(safe-area-inset-top,0px);
+  padding-left:max(32px, env(safe-area-inset-left,0px));padding-right:max(32px, env(safe-area-inset-right,0px))}
+.logo{display:block;height:30px;width:auto;fill:var(--gold)}
+.pill{font:400 13px/1 var(--f);letter-spacing:.06em;color:var(--cream);text-decoration:none;padding:12px 20px;border-radius:999px;
+  border:1px solid rgba(240,207,134,.45);background:rgba(27,13,7,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:background .3s cubic-bezier(.16,1,.3,1),border-color .3s, transform .2s;white-space:nowrap}
+.pill:hover{background:rgba(217,169,79,.18);border-color:var(--gold-hi)}
+.pill:active{transform:scale(.98)}
+.pill:focus-visible,.btn:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
+
+main{position:relative;z-index:3;pointer-events:none}
+.panel{min-height:100vh;min-height:100dvh;display:grid;align-items:center;
+  padding-block:110px 80px;padding-left:max(32px, env(safe-area-inset-left,0px));padding-right:max(32px, env(safe-area-inset-right,0px))}
+.copy{box-sizing:border-box;pointer-events:auto;width:min(36rem,44vw);display:flex;flex-direction:column;gap:22px;
+  opacity:var(--o,1);transform:translate3d(var(--tx,0px),0,0)}
+.panel.l .copy{justify-self:start;margin-left:clamp(0px,4vw,80px)}
+.panel.r .copy{justify-self:end;margin-right:clamp(0px,4vw,80px)}
+
+h1,h2,p,.who,.spec{text-shadow:0 2px 18px rgba(14,6,3,.75)}
+h1,h2{margin:0;font-weight:200;line-height:1.04;letter-spacing:-.02em;text-wrap:balance;color:var(--cream)}
+h1{font-size:clamp(2.9rem,5.6vw,5.4rem)}
+h2{font-size:clamp(2.3rem,4.2vw,4.1rem)}
+h1 b,h2 b{font-weight:400;color:var(--gold-hi)}
+p{margin:0;max-width:40ch;color:var(--muted);font-size:clamp(1.02rem,1.2vw,1.16rem)}
+.eyebrow{font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+
+.btn{appearance:none;cursor:pointer;align-self:flex-start;font:500 14px/1 var(--f);letter-spacing:.04em;white-space:nowrap;
+  color:#24120a;background:var(--gold-hi);border:0;border-radius:999px;padding:17px 28px;text-decoration:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 14px 34px -12px rgba(0,0,0,.6);transition:transform .25s cubic-bezier(.16,1,.3,1),background .25s}
+.btn:hover{background:#f7dc9f;transform:translateY(-2px)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn.ghost{background:transparent;color:var(--gold-hi);border:1px solid rgba(240,207,134,.55);box-shadow:none}
+.btn.ghost:hover{background:rgba(217,169,79,.14)}
+
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:26px 32px;margin-top:6px}
+.spec{min-width:0;padding-top:14px;border-top:1px solid rgba(240,207,134,.4)}
+.spec strong{display:block;font-weight:300;font-size:1.55rem;line-height:1.15;color:var(--cream);margin-bottom:6px}
+.spec span{font-size:.92rem;color:var(--muted);line-height:1.45;display:block}
+
+.who{display:grid;grid-template-columns:1fr;gap:24px;margin-top:4px}
+.who div{min-width:0}
+.who strong{display:block;font-weight:400;color:var(--cream);font-size:1.05rem}
+.who span{display:block;color:var(--muted);font-size:.92rem}
+.who em{display:block;font-style:normal;color:var(--gold);font-size:.8rem;letter-spacing:.08em;margin-bottom:6px}
+
+.expo{position:fixed;z-index:2;right:max(5vw, env(safe-area-inset-right,0px));bottom:5vh;width:min(44vw,660px);pointer-events:none;
+  opacity:var(--e,0);transform-origin:50% 100%;will-change:transform,opacity;
+  transform:perspective(1400px) translate3d(0,calc((1 - var(--e,0)) * 60vh),0) rotateY(var(--ry,0deg)) rotateX(var(--rx,0deg)) scale(calc(.86 + .14 * var(--e,0)))}
+.expo img{display:block;width:100%;height:auto;filter:drop-shadow(0 30px 40px rgba(8,3,1,.55))}
+.expo::after{content:"";position:absolute;left:6%;right:2%;bottom:-4%;height:10%;z-index:-1;background:radial-gradient(ellipse at center,rgba(6,2,1,.75),rgba(6,2,1,0) 70%)}
+#fallback{display:none}
+.no-webgl #fallback{display:block;position:fixed;right:24px;bottom:24px;z-index:6;color:var(--muted);font-size:13px;max-width:30ch}
+.no-webgl body{background:radial-gradient(ellipse at 60% 40%,#4a2615,#1b0d07 70%)}
+
+@media (max-width:768px){
+  header{height:64px;padding-left:max(18px, env(safe-area-inset-left,0px));padding-right:max(18px, env(safe-area-inset-right,0px))}
+  .logo{height:24px}
+  .pill{padding:10px 14px;font-size:12px}
+  .panel{align-items:end;padding-block:0;padding-left:0;padding-right:0}
+  .copy,.panel.l .copy,.panel.r .copy{width:100%;margin:0;justify-self:stretch;gap:16px;
+    padding-top:90px;padding-bottom:calc(36px + env(safe-area-inset-bottom,0px));
+    padding-left:max(18px, env(safe-area-inset-left,0px));padding-right:max(18px, env(safe-area-inset-right,0px));
+    background:none}
+  .panel.r .copy{text-align:right;align-items:flex-end}
+  .panel.r .copy p{margin-left:auto}
+  .panel.r .btn{align-self:flex-end}
+  h1{font-size:2.7rem} h2{font-size:2.2rem}
+  .expo{right:auto;bottom:auto;left:10vw;top:calc(70px + env(safe-area-inset-top,0px));width:80vw;max-width:420px}
+  .specs{gap:16px 20px}.spec{padding-top:10px}.spec strong{font-size:1.15rem}
+  .who{grid-template-columns:1fr;gap:12px}
+}
+</style>
+</head>
+<body>
+
+
+<canvas id="choco" aria-hidden="true"></canvas>
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<header>
+  <a href="#top" aria-label="Karoma, torna all'inizio">
+    <svg class="logo" viewBox="0 0 1765 389" role="img" aria-label="Karoma"><path id="logo-path" fill-rule="evenodd" d="M1716 387C1694 386 1693 385 1693 364C1693 342 1692 342 1678 355C1655 378 1628 386 1591 382C1558 378 1528 363 1507 340C1489 319 1489 320 1478 300C1471 285 1464 266 1463 257C1462 254 1461 249 1460 246C1456 230 1455 187 1457 173C1458 169 1459 163 1459 160C1461 151 1468 129 1474 117C1490 83 1512 61 1539 49C1541 48 1547 45 1552 43C1560 40 1560 40 1590 40C1624 40 1629 41 1640 46C1656 54 1668 62 1676 72C1686 84 1688 83 1688 64C1687 42 1687 42 1726 43C1761 44 1758 41 1758 78C1759 91 1759 111 1759 122C1760 132 1760 161 1761 186C1761 210 1761 231 1762 231C1762 231 1762 253 1762 278C1763 304 1763 337 1763 352C1764 382 1764 385 1759 387C1757 388 1742 388 1716 387ZM1375 376C1365 376 1365 375 1362 372C1358 369 1359 384 1356 237C1355 160 1355 159 1345 138C1333 114 1317 106 1291 109C1272 112 1257 128 1250 152C1249 159 1248 224 1249 266C1250 276 1250 302 1251 324C1251 376 1255 372 1216 371C1190 370 1184 369 1182 366C1180 363 1179 352 1178 264C1177 159 1177 158 1168 137C1156 104 1122 94 1095 115C1085 123 1082 128 1074 150C1072 157 1072 229 1073 309C1074 363 1074 361 1067 364C1063 365 1014 364 1009 363C1002 361 1003 377 1001 166C1000 28 999 33 1004 29C1007 26 1007 26 1031 26C1064 27 1065 28 1065 47C1065 64 1067 67 1073 59C1082 48 1098 37 1113 32C1127 27 1157 28 1176 34C1188 37 1213 60 1220 72C1225 83 1229 84 1235 75C1241 66 1247 61 1256 53C1277 36 1286 33 1316 34C1344 34 1346 34 1363 42C1375 48 1377 49 1385 57C1406 77 1420 106 1423 134C1424 140 1425 147 1425 151C1426 161 1428 207 1429 268C1429 299 1430 334 1430 346C1431 378 1432 377 1404 377C1394 377 1381 376 1375 376ZM818 357C789 354 754 336 733 313C706 283 691 250 686 206C685 189 684 165 685 157C687 146 693 122 696 112C713 68 751 31 789 22C798 20 848 21 862 23C870 25 892 34 896 37C898 38 903 42 908 46C919 54 938 73 943 82C955 102 963 117 966 129C967 133 969 140 970 145C975 160 977 213 974 228C973 230 973 233 972 235C972 237 971 242 969 247C968 252 966 258 965 260C957 287 936 316 912 334C888 352 854 361 818 357ZM558 346C534 345 535 345 534 321C533 210 532 23 533 21C537 14 537 14 572 15C594 15 597 18 597 32C597 48 599 49 612 37C630 20 650 13 664 19C670 22 670 22 670 58C670 98 670 98 653 99C628 101 613 115 605 142C602 150 602 150 602 245C602 348 603 342 597 345C594 346 578 347 558 346ZM455 345C435 344 434 343 434 320C434 303 431 299 424 310C419 317 403 329 394 332C352 348 307 340 276 313C261 300 242 277 238 266C237 263 234 256 231 251C225 238 220 219 219 207C218 201 217 195 217 192C215 183 215 161 217 140C220 118 222 109 235 81C246 57 270 30 288 21C291 20 296 17 299 16C310 10 314 10 344 10C379 10 382 11 403 24C409 27 413 31 419 38C432 54 433 53 433 34C432 12 433 12 465 13C489 13 494 14 497 17C499 20 500 47 500 160C500 201 501 258 501 286C501 314 501 338 501 339C499 346 494 347 455 345ZM179 334C156 333 156 333 140 305C136 298 131 290 130 287C128 284 125 279 124 276C122 273 119 268 117 265C115 262 110 254 107 248C103 242 99 234 96 230C94 227 91 222 89 218C84 207 73 191 71 191C68 191 68 193 68 259C68 322 68 322 65 325C62 329 56 330 44 329C39 328 29 328 21 328C6 328 5 327 3 319C2 313 2 22 3 13C4 1 3 2 33 2C59 3 63 4 66 8C67 11 67 16 67 64C67 115 68 116 70 118C71 119 72 119 74 116C75 115 77 112 79 110C82 106 97 86 103 77C105 73 109 68 111 64C120 53 123 50 126 45C128 43 130 39 132 37C133 35 136 31 139 27C143 20 153 9 157 6C159 5 163 5 171 6C177 6 190 6 200 6C218 7 223 8 225 12C225 15 222 22 219 26C214 31 186 69 183 74C181 78 177 83 174 86C171 90 165 97 162 102C158 107 150 118 143 128C136 137 129 146 128 148C124 154 126 161 137 177C140 180 143 186 144 189C146 191 150 198 153 203C156 208 160 214 161 216C162 218 166 224 169 229C172 234 176 241 179 244C181 248 183 253 185 254C186 256 188 260 190 263C192 267 194 271 195 272C197 274 199 278 201 282C203 285 207 292 211 298C230 327 231 329 225 333C222 335 218 335 179 334ZM1627 304C1635 303 1652 296 1658 292C1661 290 1665 285 1676 270C1680 265 1689 238 1690 226C1694 187 1679 149 1652 130C1631 114 1603 110 1580 119C1576 120 1571 122 1569 123C1568 124 1565 126 1563 128C1561 130 1558 132 1555 134C1553 136 1550 139 1549 141C1548 143 1545 147 1542 151C1539 155 1537 159 1536 161C1530 182 1528 191 1528 206C1528 233 1537 260 1554 279C1563 290 1564 290 1577 297C1596 306 1609 308 1627 304ZM847 280C858 277 872 269 877 263C879 260 883 256 885 254C890 250 900 230 903 220C906 209 905 168 902 158C892 127 872 105 848 98C814 87 780 103 764 136C747 171 749 209 770 244C785 270 823 287 847 280ZM380 263C401 256 424 232 427 212C428 210 429 203 431 196C443 145 415 92 372 84C360 81 345 81 338 84C320 90 319 91 312 98C305 104 295 118 292 124C290 127 288 135 283 152C281 163 282 186 286 197C286 199 288 205 289 208C291 218 301 236 311 246C329 263 357 270 380 263Z"/></svg>
+  </a>
+  <a class="pill" href="#contatti">Diventa rivenditore</a>
+</header>
+
+<main id="top">
+  <section class="panel l">
+    <div class="copy">
+      <span class="eyebrow">Coffee Chocolate</span>
+      <h1>Il caffè, <b>dentro</b> il cioccolato.</h1>
+      <p>Chicchi di caffè tostati ricoperti di cioccolato fondente. Croccanti fuori, intensi dentro.</p>
+      <a class="btn" href="#praline">Scopri le praline</a>
+    </div>
+  </section>
+
+  <section class="panel r">
+    <div class="copy">
+      <h2>Aprilo e scopri <b>il gusto</b>.</h2>
+      <p>Comodo astuccio da 30 g. Sfili la linguetta, alzi il coperchio e il profumo della torrefazione arriva prima del primo morso.</p>
+    </div>
+  </section>
+
+  <section class="panel l" id="praline">
+    <div class="copy">
+      <h2>Un chicco intero in ogni <b>pralina</b>.</h2>
+      <p>Il croccante del caffè tostato e la morbidezza del fondente nello stesso morso. Accanto all'espresso, o al posto del dolce.</p>
+    </div>
+  </section>
+
+  <section class="panel r">
+    <div class="copy">
+      <span class="eyebrow">Scheda prodotto</span>
+      <h2>Fatto per il <b>banco</b>.</h2>
+      <div class="specs">
+        <div class="spec"><strong>Fondente</strong><span>Chicchi di caffè tostati ricoperti di cioccolato</span></div>
+        <div class="spec"><strong>Astuccio</strong><span>Comodo formato da 30 g</span></div>
+        <div class="spec"><strong>Espositore</strong><span>Da banco, pronto per il tuo coffee shop</span></div>
+        <div class="spec"><strong>Abbinamento</strong><span>Con l'espresso, a fine pasto o in cassa</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel l" id="contatti">
+    <div class="copy">
+      <h2>Portalo al banco del tuo <b>coffee shop</b>.</h2>
+      <p>Arriva nell'espositore da banco, già pieno di astucci. Lo apri e lo metti accanto alla cassa.</p>
+      <div class="who">
+        <div><em>Distribuzione</em><strong>Feio srl</strong><span>Angri (SA)</span></div>
+      </div>
+      <button class="btn ghost" id="close-box" type="button">Richiudi l'astuccio</button>
+    </div>
+  </section>
+</main>
+
+<div class="expo"><img src="espositore.webp" alt="Espositore da banco Karoma Coffee Chocolate pieno di astucci" width="720" height="708"></div>
+
+<p id="fallback">Il browser non supporta WebGL: l'animazione 3D non è disponibile.</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  const PRAL_SRC = "pralines.webp";
+  const LOGO_W = 1765, LOGO_H = 389;
+  const LOGO = new Path2D(document.getElementById('logo-path').getAttribute('d'));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.getElementById('close-box').addEventListener('click', ()=>window.scrollTo({top:0,behavior:reduce?'auto':'smooth'}));
+
+  if(!window.THREE){ document.documentElement.classList.add('no-webgl'); return; }
+  let renderer, bgR;
+  try{
+    renderer = new THREE.WebGLRenderer({canvas:document.getElementById('stage'), antialias:true, alpha:true, powerPreference:'high-performance'});
+    bgR = new THREE.WebGLRenderer({canvas:document.getElementById('choco'), antialias:false});
+  }catch(e){ document.documentElement.classList.add('no-webgl'); return; }
+
+  /* =========== Cioccolato liquido (shader) =========== */
+  bgR.setPixelRatio(0.5);
+  const bgScene = new THREE.Scene(), bgCam = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+  const bgU = { uRes:{value:new THREE.Vector2(1,1)}, uTime:{value:0}, uScroll:{value:0}, uSide:{value:1}, uLow:{value:0}, uMouse:{value:new THREE.Vector2()} };
+  bgScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), new THREE.ShaderMaterial({
+    uniforms:bgU, depthTest:false,
+    vertexShader:'varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.,1.); }',
+    fragmentShader:`
+      precision highp float;
+      uniform vec2 uRes; uniform float uTime, uScroll, uSide, uLow; uniform vec2 uMouse;
+      varying vec2 vUv;
+      float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+      float noise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);
+        return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }
+      float fbm(vec2 p){ float v=0., a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=.5; } return v; }
+      float height(vec2 p){
+        float t=uTime*.075;
+        vec2 q=vec2(fbm(p+vec2(0.,t)), fbm(p+vec2(5.2,1.3)-t*.8));
+        vec2 r=vec2(fbm(p+1.9*q+vec2(1.7,9.2)+t*.6), fbm(p+1.9*q+vec2(8.3,2.8)-t*.5));
+        return fbm(p+2.1*r);
+      }
+      void main(){
+        vec2 uv=vUv;
+        vec2 p=(uv-.5)*vec2(uRes.x/uRes.y,1.)*1.7;
+        p.y-=uScroll*1.6; p+=uMouse*.06;
+        float e=1.5/uRes.y;
+        float h=height(p), hx=height(p+vec2(e,0.)), hy=height(p+vec2(0.,e));
+        vec3 n=normalize(vec3((h-hx)/e*.055,(h-hy)/e*.055,1.));
+        vec3 L=normalize(vec3(-.45,.65,.62)), H=normalize(L+vec3(0,0,1));
+        float diff=clamp(dot(n,L),0.,1.);
+        float nh=clamp(dot(n,H),0.,1.);
+        vec3 deep=vec3(.075,.032,.016), body=vec3(.24,.115,.058), warm=vec3(.52,.29,.15);
+        vec3 col=mix(deep,body,smoothstep(.22,.78,h));
+        col*=.42+.75*diff;
+        col+=warm*pow(nh,10.)*.38;
+        col+=vec3(1.,.88,.74)*pow(nh,90.)*.85;
+        float side=uSide*(uv.x-.5);
+        float scrim=smoothstep(-.05,-.5,side);
+        col*=1.-.38*scrim;
+        col*=1.-.45*uLow*smoothstep(.62,.05,uv.y);
+        col*=mix(.55,1.,smoothstep(1.15,.25,length((uv-.5)*vec2(1.25,1.))));
+        gl_FragColor=vec4(col,1.);
+      }`
+  })));
+
+  /* =========== Scena 3D =========== */
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.setClearColor(0,0);
+  const ANISO = renderer.capabilities.getMaxAnisotropy();
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30,1,0.1,300);
+  const col = h=>new THREE.Color(h).convertSRGBToLinear();
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const env = new THREE.Scene(); env.background = new THREE.Color(0x1a0c06);
+  function panel(w,h,c,pos){ const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide})); m.position.set(...pos); m.lookAt(0,0,0); env.add(m); }
+  panel(8,3,new THREE.Color(3.6,3.45,3.2),[0,7,4]);
+  panel(3,8,new THREE.Color(2.2,1.95,1.6),[-7,1,3]);
+  panel(3,6,new THREE.Color(1.8,1.3,.8),[7,2,-2]);
+  panel(14,2,new THREE.Color(.5,.26,.12),[0,-5,0]);
+  panel(5,5,new THREE.Color(1.3,1,.7),[2,1,-8]);
+  scene.environment = pmrem.fromScene(env,.03).texture;
+  scene.add(new THREE.HemisphereLight(0xfff0dc,0x2a1208,.45));
+  const key=new THREE.DirectionalLight(0xfff0dd,1.35); key.position.set(5,10,9); scene.add(key);
+  const rim=new THREE.DirectionalLight(0xffcf8a,1.0); rim.position.set(-8,5,-7); scene.add(rim);
+
+  /* ---------- grafica astuccio ---------- */
+  const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
+  const F='"Outfit", Arial, sans-serif';
+  const PAPER='rgb(0,165,0)', FOIL='rgb(0,58,255)', GLOSS='rgb(0,80,0)', INKM='rgb(0,150,0)';
+  function goldG(x,x0,y0,x1,y1){ const g=x.createLinearGradient(x0,y0,x1,y1);
+    g.addColorStop(0,'#b8933f'); g.addColorStop(.3,'#eed493'); g.addColorStop(.55,'#c9a14c'); g.addColorStop(.78,'#f6e4ad'); g.addColorStop(1,'#b18b38'); return g; }
+  function fit(x,t,w,size,maxW){ let s=size; for(;s>14;s-=2){ x.font=w+' '+s+'px '+F; if(x.measureText(t).width<=maxW) break; } return s; }
+  function bean(x,cx,cy,rx,ry,rot,stroke,lw){
+    x.save(); x.translate(cx,cy); x.rotate(rot); x.strokeStyle=stroke; x.lineWidth=lw;
+    for(let k=0;k<4;k++){ x.beginPath(); x.ellipse(0,0,rx-k*rx*.13,ry-k*ry*.13,0,0,Math.PI*2); x.stroke(); }
+    for(let k=-1;k<=1;k++){ x.beginPath(); x.moveTo(-rx*.92,k*ry*.07);
+      x.bezierCurveTo(-rx*.3,-ry*.45+k*ry*.07, rx*.3,ry*.45+k*ry*.07, rx*.92,k*ry*.07); x.stroke(); }
+    x.restore();
+  }
+  function logo(x,len,fill){ const s=len/LOGO_W; x.save(); x.scale(s,s); x.fillStyle=fill; x.fill(LOGO); x.restore(); }
+  const PRAL = new Image(); PRAL.src = PRAL_SRC;
+
+  function drawFront(c,mask){
+    const x=c.getContext('2d'),W=c.width,H=c.height; x.clearRect(0,0,W,H);
+    x.fillStyle=mask?PAPER:'#fbf9f4'; x.fillRect(0,0,W,H);
+    if(!mask){ x.save(); x.beginPath(); x.rect(0,0,W,H); x.clip();
+      bean(x,470,1080,330,215,-.55,'rgba(200,168,118,.34)',2.2);
+      bean(x,110,1330,280,190,.45,'rgba(200,168,118,.3)',2.2);
+      bean(x,600,1470,230,160,.15,'rgba(200,168,118,.28)',2); x.restore(); }
+    const GOLD = mask?FOIL:goldG(x,0,200,0,1020);
+    const LL=800, LH=LL*LOGO_H/LOGO_W;
+    x.save(); x.translate(44,1016); x.rotate(-Math.PI/2); logo(x,LL,GOLD); x.restore();
+    x.fillStyle=GOLD; x.font='500 30px '+F; x.textAlign='center'; x.fillText('®',44+LH*.5,1016-LL-14);
+    x.textAlign='left';
+    const fs=fit(x,'Chocolate','300',84,318);
+    x.fillStyle=GOLD; x.font='300 '+fs+'px '+F; x.fillText('Coffee',292,388); x.fillText('Chocolate',292,388+fs*1.06);
+    x.fillRect(294,388+fs*1.06+34,96,3);
+    x.fillStyle=mask?INKM:'#4e2a1b'; x.font='400 27px '+F;
+    const ty=388+fs*1.06+92; ['Chicchi di caffè tostati','ricoperti di cioccolato','fondente'].forEach((t,i)=>x.fillText(t,294,ty+i*38));
+    if(PRAL.complete && PRAL.naturalWidth){
+      const pw=590, ph=pw*PRAL.naturalHeight/PRAL.naturalWidth, px=25, py=H-ph-58;
+      if(mask){ x.fillStyle=GLOSS; x.fillRect(px+20,py+20,pw-40,ph-30); }
+      else{
+        x.save(); x.filter='blur(16px)'; x.fillStyle='rgba(70,40,20,.35)'; x.beginPath(); x.ellipse(W/2,py+ph-8,pw*.46,26,0,0,Math.PI*2); x.fill(); x.restore();
+        x.drawImage(PRAL,px,py,pw,ph);
+      }
+    }
+  }
+  function drawSide(c,mask){
+    const x=c.getContext('2d'),W=c.width,H=c.height; x.clearRect(0,0,W,H);
+    x.fillStyle=mask?FOIL:goldG(x,0,0,W*1.6,H); x.fillRect(0,0,W,H);
+    if(!mask){
+      for(let i=0;i<260;i++){ x.fillStyle='rgba(255,246,220,'+(Math.random()*.07)+')'; x.fillRect(0,Math.random()*H,W,1); }
+      x.save(); x.beginPath(); x.rect(0,0,W,H); x.clip();
+      bean(x,W*.75,H*.8,300,200,.5,'rgba(255,240,205,.22)',2.4); bean(x,W*.1,H*.92,240,170,-.3,'rgba(255,240,205,.18)',2.2); x.restore();
+    }
+    x.save(); x.translate(W*.42,H*.56); x.rotate(-Math.PI/2); x.textAlign='center';
+    x.fillStyle=mask?PAPER:'#fffaf2'; const s=fit(x,'Coffee Chocolate','300',132,H*.72);
+    x.font='300 '+s+'px '+F; x.fillText('Coffee Chocolate',0,s*.35);
+    x.fillRect(-60,s*.35+38,120,3); x.restore();
+  }
+  function drawLid(c,mask){
+    const x=c.getContext('2d'),W=c.width,H=c.height; x.clearRect(0,0,W,H);
+    x.fillStyle=mask?PAPER:'#fbf9f4'; x.fillRect(0,0,W,H);
+    if(!mask){ x.save(); x.beginPath(); x.rect(0,0,W,H); x.clip(); bean(x,W*.8,H*.75,240,160,-.4,'rgba(200,168,118,.28)',2); x.restore(); }
+    const len=360, lh=len*LOGO_H/LOGO_W;
+    x.save(); x.translate((W-len)/2,(H-lh)/2); logo(x,len,mask?FOIL:goldG(x,0,0,len,0)); x.restore();
+  }
+  function drawBack(c){
+    const x=c.getContext('2d'),W=c.width,H=c.height;
+    x.fillStyle='#fbf9f4'; x.fillRect(0,0,W,H);
+    x.save(); x.translate(60,80); logo(x,240,'#c99a45'); x.restore();
+    x.fillStyle='#4e2a1b'; x.font='300 44px '+F; x.fillText('Coffee Chocolate',60,250);
+    x.font='500 20px '+F; x.fillText('INGREDIENTI',60,330);
+    x.fillStyle='rgba(78,42,27,.28)'; for(let i=0;i<6;i++) x.fillRect(60,352+i*26,520-(i===5?230:(i%2)*50),9);
+    x.strokeStyle='#4e2a1b'; x.lineWidth=2; x.strokeRect(60,560,520,300);
+    x.fillStyle='#4e2a1b'; x.font='500 18px '+F; x.fillText('VALORI NUTRIZIONALI · 100 g',78,594);
+    x.lineWidth=1; for(let i=1;i<7;i++){ x.beginPath(); x.moveTo(60,560+i*42); x.lineTo(580,560+i*42); x.stroke(); }
+    x.fillStyle='rgba(78,42,27,.28)'; for(let i=1;i<7;i++){ x.fillRect(78,560+i*42+17,180,8); x.fillRect(470,560+i*42+17,90,8); }
+    x.fillStyle='#4e2a1b'; x.font='400 19px '+F;
+    x.fillText('Distribuito da Feio srl · Angri (SA)',60,950);
+    let bx=380; x.fillStyle='#2a160c'; while(bx<575){ const w=1+((bx*7)%4); x.fillRect(bx,1040,w,100); bx+=w+1+((bx*13)%4); }
+  }
+
+  const C={front:mk(640,1616),frontM:mk(640,1616),side:mk(488,1616),sideM:mk(488,1616),lid:mk(640,488),lidM:mk(640,488),back:mk(640,1616)};
+  function paint(){ drawFront(C.front,false); drawFront(C.frontM,true); drawSide(C.side,false); drawSide(C.sideM,true); drawLid(C.lid,false); drawLid(C.lidM,true); drawBack(C.back); }
+  paint();
+  const T={}; Object.keys(C).forEach(k=>{ const t=new THREE.CanvasTexture(C[k]); t.anisotropy=ANISO; if(!k.endsWith('M')) t.encoding=THREE.sRGBEncoding; T[k]=t; });
+  function repaint(){ paint(); Object.values(T).forEach(t=>t.needsUpdate=true); }
+  PRAL.onload=repaint;
+  if(document.fonts&&document.fonts.load){ Promise.all(['300 84px Outfit','400 27px Outfit','500 30px Outfit'].map(f=>document.fonts.load(f))).then(repaint).catch(()=>{}); }
+
+  const pm=(map,mask)=>new THREE.MeshStandardMaterial({map,metalnessMap:mask,roughnessMap:mask,metalness:1,roughness:1,envMapIntensity:1.15});
+  const frontMat=pm(T.front,T.frontM), sideMat=pm(T.side,T.sideM), lidMat=pm(T.lid,T.lidM);
+  const backMat=new THREE.MeshStandardMaterial({map:T.back,roughness:.7});
+  const E=new THREE.MeshStandardMaterial({color:col(0xf1ece2),roughness:.6});
+  const I=new THREE.MeshStandardMaterial({color:col(0xe2d8c6),roughness:.9});
+
+  const W=3.8, H=9.6, D=2.9, TH=.05;
+  const rig=new THREE.Group(); scene.add(rig);
+  const box=new THREE.Group(); rig.add(box);
+  function wall(w,h,d,m,p){ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); o.position.set(...p); box.add(o); }
+  wall(W,H,TH,[E,E,E,E,frontMat,I],[0,0,D/2-TH/2]);
+  wall(W,H,TH,[E,E,E,E,I,backMat],[0,0,-D/2+TH/2]);
+  wall(TH,H,D-2*TH,[sideMat,I,E,E,E,E],[W/2-TH/2,0,0]);
+  wall(TH,H,D-2*TH,[I,sideMat,E,E,E,E],[-W/2+TH/2,0,0]);
+  wall(W-2*TH,TH,D-2*TH,[E,E,I,E,E,E],[0,-H/2+TH/2,0]);
+  const lidP=new THREE.Group(); lidP.position.set(0,H/2,-D/2); box.add(lidP);
+  const lid=new THREE.Mesh(new THREE.BoxGeometry(W,TH,D),[E,E,lidMat,I,E,E]); lid.position.set(0,TH/2,D/2); lidP.add(lid);
+  const tuckP=new THREE.Group(); tuckP.position.set(0,0,D-TH*1.7); lidP.add(tuckP);
+  const TF=1.15; const tuck=new THREE.Mesh(new THREE.BoxGeometry(W-.14,TF,TH*.8),[E,E,E,E,I,E]); tuck.position.y=-TF/2; tuckP.add(tuck);
+  const FW=D*.44, FL=D-.3;
+  function dust(s){ const p=new THREE.Group(); p.position.set(s*(W/2-TH),H/2-TH*1.5,0); box.add(p);
+    const m=new THREE.Mesh(new THREE.BoxGeometry(FW,TH*.8,FL),I); m.position.x=-s*FW/2; p.add(m); return p; }
+  const dR=dust(1), dL=dust(-1);
+
+  const shc=mk(256,256), sx=shc.getContext('2d'), sg=sx.createRadialGradient(128,128,0,128,128,128);
+  sg.addColorStop(0,'rgba(8,3,1,.85)'); sg.addColorStop(.45,'rgba(8,3,1,.4)'); sg.addColorStop(1,'rgba(8,3,1,0)'); sx.fillStyle=sg; sx.fillRect(0,0,256,256);
+  const shadow=new THREE.Mesh(new THREE.PlaneGeometry(9,7),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shc),transparent:true,depthWrite:false}));
+  shadow.rotation.x=-Math.PI/2; shadow.position.y=-H/2-.02; box.add(shadow);
+
+  /* ---------- praline e chicchi ricoperti ---------- */
+  function rng(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  const R=rng(11);
+  const pg=new THREE.SphereGeometry(.5,48,32);
+  { const p=pg.attributes.position,v=new THREE.Vector3(); for(let i=0;i<p.count;i++){ v.fromBufferAttribute(p,i);
+      const n=1+.05*Math.sin(v.x*7.1+v.y*3.3)+.04*Math.sin(v.z*6.3-v.y*5.1)+.02*Math.sin(v.x*15+v.z*12);
+      v.multiplyScalar(n); v.y*=.9; v.z*=1.06; p.setXYZ(i,v.x,v.y,v.z); } pg.computeVertexNormals(); }
+  const bg=new THREE.SphereGeometry(1,48,32);
+  { const p=bg.attributes.position,v=new THREE.Vector3(); for(let i=0;i<p.count;i++){ v.fromBufferAttribute(p,i);
+      if(v.y>0) v.y-=.5*Math.exp(-Math.pow(v.x/.12,2))*v.y;
+      v.x*=.42; v.y*=.3; v.z*=.6; p.setXYZ(i,v.x,v.y,v.z); } bg.computeVertexNormals(); }
+  const choc=new THREE.MeshPhysicalMaterial({color:col(0x2b140b),roughness:.36,clearcoat:.9,clearcoatRoughness:.2});
+  const choc2=new THREE.MeshPhysicalMaterial({color:col(0x37190d),roughness:.4,clearcoat:.8,clearcoatRoughness:.25});
+  const beanM=new THREE.MeshPhysicalMaterial({color:col(0x5b2a16),roughness:.32,clearcoat:1,clearcoatRoughness:.15});
+  const top=H/2, items=[];
+  const starts=[];
+  [-1.1,0,1.1].forEach(xx=>[-.6,.6].forEach(zz=>starts.push([xx,top-.75,zz,0])));
+  [-.55,.55].forEach(xx=>[-.6,.6].forEach(zz=>starts.push([xx,top-1.7,zz,1])));
+  for(let i=0;i<6;i++) starts.push([(R()-.5)*2.4, top-2.6-R()*1.2, (R()-.5)*1.5, 1]);
+  const N=starts.length;
+  starts.forEach((s,i)=>{
+    const isBean = i%3===1;
+    const m=new THREE.Mesh(isBean?bg:pg, isBean?beanM:(i%2?choc2:choc));
+    m.scale.setScalar(isBean?1.05:(.92+R()*.18)); box.add(m);
+    items.push({m,s:new THREE.Vector3(s[0],s[1],s[2]),
+      ang:(i/N)*Math.PI*2+(R()-.5)*.5, rad:2.3+R()*1.7, ty:top+.9+R()*4.2, cy:top+1.4+R()*1.1,
+      r0:new THREE.Euler(R()*6,R()*6,R()*6), sp:new THREE.Vector3((R()-.5)*3,(R()-.5)*3,(R()-.5)*3), ph:R()*6.28, delay:i*.026});
+  });
+
+  /* ---------- animazione ---------- */
+  const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), lerp=(a,b,t)=>a+(b-a)*t;
+  const ss=(a,b,v)=>{ const t=clamp((v-a)/(b-a),0,1); return t*t*(3-2*t); };
+  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  let prog=0, mx=0,my=0,smx=0,smy=0, vw=1, vh=1, aspect=1;
+  addEventListener('pointermove',e=>{ mx=e.clientX/innerWidth*2-1; my=e.clientY/innerHeight*2-1; },{passive:true});
+  function resize(){ vw=innerWidth; vh=innerHeight; aspect=vw/vh;
+    renderer.setSize(vw,vh,false); bgR.setSize(vw,vh,false);
+    bgU.uRes.value.set(vw*.5,vh*.5); camera.aspect=aspect; camera.updateProjectionMatrix(); }
+  addEventListener('resize',resize); resize();
+
+  const copies=[...document.querySelectorAll('.copy')];
+  const expo=document.querySelector('.expo');
+  const tmp=new THREE.Vector3(), q=new THREE.Vector3(), clock=new THREE.Clock();
+  function frame(){
+    const dt=Math.min(clock.getDelta(),.05), t=clock.elapsedTime;
+    const max=document.documentElement.scrollHeight-vh, target=max>0?clamp(scrollY/max,0,1):0;
+    prog+=(target-prog)*(1-Math.exp(-dt*(reduce?40:5)));
+    smx+=(mx-smx)*(1-Math.exp(-dt*3)); smy+=(my-smy)*(1-Math.exp(-dt*3));
+    const p=prog, idle=reduce?0:1;
+
+    // il lato dell'astuccio: destra (+1) nelle sezioni pari, sinistra (-1) nelle dispari
+    const side=Math.cos(p*Math.PI*4);
+    const mobile=aspect<.9;
+    if(mobile) camera.setViewOffset(vw,vh,-vw*.1*side,vh*.27,vw,vh);
+    else camera.setViewOffset(vw,vh,-vw*.22*side,0,vw,vh);
+
+    const open=ss(.1,.42,p);
+    const tk=ease(clamp(open/.32,0,1)), ld=ease(clamp((open-.2)/.45,0,1)), du=ease(clamp((open-.58)/.42,0,1));
+    const rise=clamp((p-.33)/.32,0,1);
+    tuckP.rotation.x=-1.45*tk; lidP.rotation.x=-1.95*ld; dR.rotation.z=-2.05*du; dL.rotation.z=2.05*du;
+
+    items.forEach(it=>{
+      const k=ease(clamp((rise-it.delay)/.45,0,1)), a=it.ang+t*.07*idle*k;
+      tmp.set(Math.cos(a)*it.rad, it.ty+Math.sin(t*.9+it.ph)*.13*k*idle, Math.sin(a)*it.rad*.8);
+      q.set(it.s.x*.5,it.cy,it.s.z*.5); const u=1-k;
+      it.m.position.set(u*u*it.s.x+2*u*k*q.x+k*k*tmp.x, u*u*it.s.y+2*u*k*q.y+k*k*tmp.y, u*u*it.s.z+2*u*k*q.z+k*k*tmp.z);
+      it.m.rotation.set(it.r0.x+it.sp.x*k+t*.25*k*idle, it.r0.y+it.sp.y*k+t*.2*k*idle, it.r0.z+it.sp.z*k);
+    });
+
+    // l'astuccio gira verso il testo mentre attraversa lo schermo
+    const sway=-Math.sin(p*Math.PI*4);
+    box.rotation.y = -.42*side + .5*sway + smx*.14*idle + (reduce?0:Math.sin(t*.45)*.035);
+    box.rotation.z = .05*sway;
+    const Rb = 31.5*(mobile?Math.min(2,1.1/aspect):1);
+    const radius=Rb*lerp(1,1.28,ss(.12,.6,p));
+    const elev=lerp(.08,.5,ss(.12,.4,p))-.2*ss(.5,.8,p)+smy*.05*idle;
+    const lookY=lerp(.2,top-.1,ss(.15,.6,p));
+    camera.position.set(0,lookY+Math.sin(elev)*radius,Math.cos(elev)*radius);
+    camera.lookAt(0,lookY,0);
+
+    // finale: l'astuccio vola via, entra l'espositore
+    const exit=ease(ss(.76,.88,p));
+    rig.position.set(exit*10, exit*19, -exit*3);
+    rig.rotation.set(-exit*.45, exit*2.4, exit*.3);
+    rig.visible = exit<.995;
+    const ex=ease(ss(.83,.98,p));
+    expo.style.setProperty('--e',ex.toFixed(3));
+    expo.style.setProperty('--ry',(idle*smx*7).toFixed(2)+'deg');
+    expo.style.setProperty('--rx',(-idle*smy*3).toFixed(2)+'deg');
+
+    // il testo entra dal suo lato
+    copies.forEach((el,i)=>{
+      const d=Math.abs(p*4-i); const o=clamp(1.25-d*1.15,0,1);
+      el.style.setProperty('--o',o.toFixed(3));
+      if(!reduce && !mobile) el.style.setProperty('--tx',((i%2?1:-1)*(1-o)*60).toFixed(1)+'px');
+    });
+
+    bgU.uTime.value = reduce?6:t; bgU.uScroll.value=p; bgU.uSide.value=mobile?0:side; bgU.uLow.value=mobile?1:0;
+    bgU.uMouse.value.set(smx,smy);
+    bgR.render(bgScene,bgCam);
+    renderer.render(scene,camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
